@@ -1,0 +1,140 @@
+/* Create a table called NAMES */ CREATE TABLE Client(
+ID int PRIMARY KEY,
+Fname varchar(10) not null, Lname varchar(10) not null, password varchar(8) not null, address varchar(10),
+Email varchar(15) not null);
+CREATE TABLE Client_phone( Phone_number int primary key ,
+ID int not null,
+foreign key (ID) references Client (ID));
+CREATE TABLE Purcheser( ship_address varchar(10) not null,
+ID int not null,
+foreign key (ID) references Client (ID));
+CREATE TABLE Supplier( Bank_account_no int not null ,
+ID int not null,
+foreign key (ID) references Client (ID));
+CREATE TABLE Auction( Auc_id int PRIMARY KEY, Start_price int not null, increment float not null, reserve int not null, expiration date, discription varchar(15), ID not null,
+foreign key (ID) references Supplier (ID));
+CREATE TABLE Bid( Bid_id int PRIMARY KEY, price int not null, Time_Stamp timestamp, Auc_id int not null, Item_id int not null,
+ID int not null,
+ foreign key (Auc_id) references Auction (Auc_id),
+foreign key (Item_id) references Computer_Item (Item_id), foreign key (ID) references Purcheser (ID));
+CREATE TABLE Bill(
+Bill_id int PRIMARY KEY,
+order_date date not null,
+quantity int not null,
+Bid_id int not null,
+foreign key (Bid_id) references Bid (Bid_id));
+CREATE TABLE Replace_item(
+Bill_id int not null,
+Correct_specification varchar(20),
+foreign key (Bill_id) references Bill (Bill_id));
+CREATE TABLE Return_item(
+Bill_id int not null,
+Reasin varchar(20),
+foreign key (Bill_id) references Bill (Bill_id));
+CREATE TABLE Bill_problem(
+Bill_id int not null,
+foreign key (Bill_id) references Bill (Bill_id));
+CREATE TABLE Computer_Item( Item_id int PRIMARY KEY, description varchar(15) ,
+title varchar(15), start_bid_price int,
+ID int not null,
+foreign key (ID) references Supplier(ID));
+CREATE TABLE Computer_accessories( cost int,
+Computer_type varchar(10) , manufacture varchar(10) ,
+Name varchar(10),
+Item_id int not null,
+ID int not null,
+foreign key (Item_id) references Computer_Item (Item_id),
+
+ foreign key (ID) references Supplier(ID));
+CREATE TABLE Hardware( Memory varchar(5), Speed int ,
+Storage varchar(5) , Item_id int not null,
+ID int not null,
+foreign key (Item_id) references Computer_Item (Item_id), foreign key (ID) references Supplier(ID));
+CREATE TABLE SoftWare( Item_id int not null, year_of_manufacture date , manufacture varchar(100) , version float,
+cost float,
+Author varchar(10),
+ID int not null,
+foreign key (Item_id) references Computer_Item (Item_id), foreign key (ID) references Supplier(ID));
+CREATE TABLE Comment( Discription varchar(15), rating int ,
+ID int not null,
+Bill_id int not null,
+foreign key (ID) references Client (ID), foreign key (Bill_id) references Bill (Bill_id));
+CREATE TABLE Written_on(
+Bill_id int not null,
+foreign key (Bill_id) references Bill (Bill_id));
+CREATE view Supplier_items
+as
+select Fname,Lname,address,Supplier.ID,count(Item_id) as No_of_items,address from Client natural join Supplier natural join Computer_Item;
+CREATE view Winner_Detailes
+as
+select Computer_Item.title as itemTitle,Fname,Lname
+
+ from bill natural join Bid natural join Purcheser natural join Client
+natural join Computer_Item;
+insert into Client
+values (333,'james','smith',1234,'UAE dubai','james@gmail.com'), (444,'ghada','mohammed',5432,'saudi arabia jeddah','ghada@gmail.com'), (555,'Arwa','khalid',9876,'saudi arabia dahran','arwa@gmail.com'), (666,'faris','omar',8901,'saudi arabia riyadh','faris@gmail.com'), (777,'sultan','ahmed',7841,'saudi arabia dammam','sultan@gmail.com'), (888,'faisal','karim',1306,'UAE dubai','faisal@gmail.com'), (999,'salem','abdullah',1423,'saudi arabia riyadh','salem@gmail.com'), (100,'waad','mustafa',1899,'saudi arabia riyadh','waad@gmail.com');
+insert into Client_phone
+values (05012300,333),
+(05324556,444), (05554322,555), (05789990,666), (05349192,777), (05923770,888), (05011000,999), (05222330,100);
+insert into Purcheser values ('riyadh',333),
+('jeddah',444), ('dammam',777), ('dubai',888);
+insert into Supplier
+values (620000012333,555),
+(620000012333,666), (620000098765,999), (620000056748,100);
+insert into Auction
+values (10,200,0.1,100,'2-1-2020',null,555), (11,1500,0.2,170,'20-12-2019',null,666);
+insert into Computer_Item
+
+ values
+(22,null,'iOS',50,555), (33,null,'Andeoid',170,666), (44,null,'galaxy',128,999), (55,null,'macDestop',1000,100), (66,null,'huawiiLaptp',null,999), (77,null,'macBook pro',null,100);
+insert into Bid
+values
+(1,50, '2-1-2020 21:22:23',10,22,333), (2,170, '20-12-2019 1:02:10',11,33,444), (3,20, '20-12-2019 1:02:10',11,33,444), (4,1000, '20-12-2019 1:02:10',11,33,444);
+insert into Hardware
+values
+('200 RAM','4.7GHz','256GB',44,999), ('170 RAM','3.3GHz','128GB',55,100), ('180 RAM','2.7GHz','64GB',66,999), ('200 RAM','5.3GHz','256GB',77,100);
+insert into SoftWare
+values (22,2020,'apple',1.04,2500,'steve',555), (33,2018,'samsung',3.01,1750,'kim',666);
+insert into Bill values
+(01,'6-1-2020',1,1), (02,'27-12-2019',1,2);
+insert into Comment
+values
+('Ecxellent!',5,333,01), ('very bad!',1,444,02),
+('good transaction',5,999,01),
+('i am happy with this transaction!',5,100,02);
+insert into Written_on
+values
+(01), (02);
+
+ insert into Computer_accessories
+values(10,'huawiiLaptp','Laptop Stickers','alain for electronics',66,999), (255,'huawiiLaptp','Laptop cover','alain for electronics',77,999);
+insert into Replace_item values(01,'2021');
+insert into Return_item values(02,'i found a better item');
+insert into Bill_problem values(01),(02);
+select count(Bid_id),MAX(price),title
+from Bid , Computer_Item
+where Bid.Item_id=Computer_Item.Item_id;
+select Fname,Lname,count(Item_id)
+from ((Client natural join Supplier) natural join Computer_Item);
+select Fname,Lname,ID,count(Bid_id)
+from Purcheser natural join Client natural join Bid where Bid_id>3;
+select title ,avg(price),count(Bid_id)
+from Computer_Item join Bid on Computer_Item.Item_id=Bid.Item_id group by title;
+select title,Item_id
+from Computer_Item
+where start_bid_price isnull;
+select Fname,Lname
+from (Client natural join Comment) where rating>=3;
+select Fname,Lname,ID,address from Client natural join Purcheser
+
+where address like 'saudi arabia%';
+select Fname ,Lname,ID,No_of_items ,address from Supplier_items
+where address like '% riyadh' and No_of_items>2;
+select *
+from Computer_accessories;
+select *
+from Replace_item;
+select *
+from Return_item;
+select *
+from Bill_problem;
